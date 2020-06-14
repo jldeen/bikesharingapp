@@ -30,12 +30,12 @@ jobs:
           cluster-name: ${{ secrets.CLUSTER_NAME }}
           resource-group: ${{ secrets.RESOURCE_GROUP }}
 
-      # - name: Create valid child namespace name
-      #   id: generate-child-space-name
-      #   run: |
-      #     branch=${GITHUB_HEAD_REF::63}
-      #     branch=$(echo ${branch//[!0-9a-zA-Z]/-} | tr '[:upper:]' '[:lower:]' | sed -e 's/^-/z/' -e 's/-$/z/')
-      #     echo ::set-output name=result::$branch
+      - name: Create valid child namespace name
+        id: generate-child-space-name
+        run: |
+          branch=${GITHUB_HEAD_REF::63}
+          branch=$(echo ${branch//[!0-9a-zA-Z]/-} | tr '[:upper:]' '[:lower:]' | sed -e 's/^-/z/' -e 's/-$/z/')
+          echo ::set-output name=result::$branch
 
       # - name: Create child namespaces and add Dev Spaces labels
       #   run: |
@@ -94,7 +94,8 @@ jobs:
             --namespace $GITHUB_HEAD_REF \
             --set image.repository=${{ secrets.CONTAINER_REGISTRY }}/bikes \
             --set image.tag=$GITHUB_SHA \
-            --set imagePullSecrets[0].name=${{ secrets.IMAGE_PULL_SECRET }}
+            --set imagePullSecrets[0].name=${{ secrets.IMAGE_PULL_SECRET }} \
+            --set ingress.hosts[0]=$GITHUB_HEAD_REF.s.${{ secrets.HOST }}
 
       - uses: azure/dev-spaces/actions/add-review-url@Releases/v2
         with:
