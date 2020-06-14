@@ -30,21 +30,29 @@ jobs:
           cluster-name: ${{ secrets.CLUSTER_NAME }}
           resource-group: ${{ secrets.RESOURCE_GROUP }}
 
-      - name: Create valid child namespace name
-        id: generate-child-space-name
-        run: |
-          branch=${GITHUB_HEAD_REF::63}
-          branch=$(echo ${branch//[!0-9a-zA-Z]/-} | tr '[:upper:]' '[:lower:]' | sed -e 's/^-/z/' -e 's/-$/z/')
-          echo ::set-output name=result::$branch
+      # - name: Create valid child namespace name
+      #   id: generate-child-space-name
+      #   run: |
+      #     branch=${GITHUB_HEAD_REF::63}
+      #     branch=$(echo ${branch//[!0-9a-zA-Z]/-} | tr '[:upper:]' '[:lower:]' | sed -e 's/^-/z/' -e 's/-$/z/')
+      #     echo ::set-output name=result::$branch
+
+      # - name: Create child namespaces and add Dev Spaces labels
+      #   run: |
+      #     if [ -n "$(kubectl get namespace ${{steps.generate-child-space-name.outputs.result}} --ignore-not-found -o name)" ]; then exit 0; fi
+      #     kubectl create namespace ${{steps.generate-child-space-name.outputs.result}} \
+      #     kubectl label namespace ${{steps.generate-child-space-name.outputs.result}} \
+      #       azds.io/parent-space=${{ secrets.MASTER_SPACE }} \
+      #       azds.io/space=true \
+      #       azds.io/pull-request-space=true
 
       - name: Create child namespaces and add Dev Spaces labels
         run: |
-          if [ -n "$(kubectl get namespace ${{steps.generate-child-space-name.outputs.result}} --ignore-not-found -o name)" ]; then exit 0; fi
-          kubectl create namespace ${{steps.generate-child-space-name.outputs.result}} \
-          kubectl label namespace ${{steps.generate-child-space-name.outputs.result}} \
-            azds.io/parent-space=${{ secrets.MASTER_SPACE }} \
-            azds.io/space=true \
-            azds.io/pull-request-space=true
+          if [ -n "$(kubectl get namespace $GITHUB_HEAD_REF --ignore-not-found -o name)" ]; then exit 0; fi
+          kubectl create namespace $GITHUB_HEAD_REF
+          kubectl label namespace $GITHUB_HEAD_REF azds.io/parent-space=${{ secrets.MASTER_SPACE }} 
+          kubectl label namespace $GITHUB_HEAD_REF azds.io/space=true
+          kubectl label namespace $GITHUB_HEAD_REF azds.io/pull-request-space=true
 
       - uses: azure/k8s-create-secret@v1
         with:
