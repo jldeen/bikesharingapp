@@ -1,3 +1,5 @@
+auth.json
+makefile
 contoso-bikerental/charts/*
 
 ## Ignore Visual Studio temporary files, build results, and
