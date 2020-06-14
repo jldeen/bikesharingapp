@@ -56,7 +56,7 @@ jobs:
 
       - uses: azure/k8s-create-secret@v1
         with:
-          namespace: ${{ steps.generate-child-space-name.outputs.result }}
+          namespace: $GITHUB_HEAD_REF
           container-registry-url: ${{ secrets.CONTAINER_REGISTRY }}
           container-registry-username: ${{ secrets.REGISTRY_USERNAME }}
           container-registry-password: ${{ secrets.REGISTRY_PASSWORD }}
@@ -89,7 +89,7 @@ jobs:
         run: |
           ${{steps.install-helm-client.outputs.helm}} upgrade \
             --install  ${{steps.generate-release-name.outputs.result}} Bikes/charts \
-            --namespace ${{steps.generate-child-space-name.outputs.result}} \
+            --namespace $GITHUB_HEAD_REF \
             --set image.repository=${{ secrets.CONTAINER_REGISTRY }}/bikes \
             --set image.tag=$GITHUB_SHA \
             --set imagePullSecrets[0].name=${{ secrets.IMAGE_PULL_SECRET }}
