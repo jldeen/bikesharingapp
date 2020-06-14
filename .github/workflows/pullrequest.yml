@@ -87,10 +87,10 @@ jobs:
 
       - name: Helm Upgrade PR
         run: |
-          cd Bikes/
+          cd Bikes/charts/bikes
           ${{steps.install-helm-client.outputs.helm}} dependency update
           ${{steps.install-helm-client.outputs.helm}} upgrade \
-            --install  ${{steps.generate-release-name.outputs.result}} charts/bikes \
+            --install ${{steps.generate-release-name.outputs.result}} . \
             --namespace $GITHUB_HEAD_REF \
             --set image.repository=${{ secrets.CONTAINER_REGISTRY }}/bikes \
             --set image.tag=$GITHUB_SHA \
