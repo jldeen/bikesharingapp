@@ -90,7 +90,7 @@ pipelines:
           releaseName: ${result}
           chartPath: ./Bikes/charts/bikes
           flags: "--namespace $nameSpace -f values.yaml --set image.repository=jldeen.jfrog.io/images/bikes 
-          --set image.tag=${run_number} --set fullnameOverride=$result --set imagePullSecrets.name=$result"
+          --set image.tag=${run_number} --set fullnameOverride=$result --set imagePullSecrets[0].name=$result"
           # affinityGroup: cartapi
           inputResources:
             - name: GitHub
