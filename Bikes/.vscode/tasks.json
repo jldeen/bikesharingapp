@@ -1,26 +1,14 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"label": "dev-spaces: prelaunch",
-			"type": "dev-spaces.prelaunch",
-			"request": "launch",
-			"port": 55147
-		},
-		{
-			"label": "dev-spaces: preattach",
-			"type": "dev-spaces.prelaunch",
-			"request": "attach",
-			"port": 55147,
-			"mainScript": "server.js"
-		},
-		{
-			"label": "dev-spaces.connect.service",
-			"type": "dev-spaces.connect.service",
-			"service": "bikes",
-			"ports": [
-				3000
-			]
-		}
-	]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "bridge-to-kubernetes.service",
+            "type": "bridge-to-kubernetes.service",
+            "service": "bikes",
+            "ports": [
+                3000
+            ],
+            "isolateAs": "jessicad-f4dc"
+        }
+    ]
 }
