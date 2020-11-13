@@ -6,13 +6,17 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "debug": "node --nolazy --inspect-brk=9229 server.js"
+    "debug": "node --nolazy server.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Azure/dev-spaces.git"
+    "url": "git+https://github.com/microsoft/mindaro.git"
   },
-  "author": "Azure Dev Spaces",
+<<<<<<< HEAD
+  "author": "Local Process for Kubernetes",
+=======
+  "author": "Bridge to Kubernetes",
+>>>>>>> main/master
   "license": "MIT",
   "dependencies": {
     "express": "^4.14.0",
@@ -28,7 +32,11 @@
     "nodemon": "^1.18.10"
   },
   "bugs": {
-    "url": "https://github.com/Azure/dev-spaces/issues"
+    "url": "https://github.com/microsoft/mindaro/issues"
   },
-  "homepage": "https://github.com/Azure/dev-spaces#readme"
+  "homepage": "https://github.com/microsoft/mindaro#readme"
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> main/master

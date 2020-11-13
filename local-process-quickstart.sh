@@ -142,7 +142,7 @@ ${HELMDIR}/helm install $INGRESSNAME stable/traefik \
 NIPIOFQDN=${PUBLICIP}.nip.io
 echo "The Nip.IO FQDN would be " $NIPIOFQDN
  
-CHARTDIR=${REPOROOT}/samples/BikeSharingApp/charts/
+CHARTDIR=${REPOROOT}/charts/
 echo "---"
 echo "Chart directory: $CHARTDIR"
  

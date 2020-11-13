@@ -8,7 +8,7 @@ fullnameOverride: bikesharingweb
 replicaCount: 1
 image:
   repository: azdspublic/bikesharing-bikesharingweb
-  tag: build.20200204.5
+  tag: build.20200723.1
   pullPolicy: IfNotPresent
 imagePullSecrets: []
   # Optionally specify an array of imagePullSecrets.
@@ -27,7 +27,7 @@ probes:
 ingress:
   enabled: true
   annotations:
-    kubernetes.io/ingress.class: addon-http-application-routing
+    kubernetes.io/ingress.class: traefik
   path: /
   hosts:
     - dev.bikesharingweb.<REPLACE_ME_WITH_HOST_SUFFIX>

@@ -10,7 +10,11 @@
                 "debug"
             ],
             "port": 9229,
-            "preLaunchTask": "dev-spaces.connect.service"
+<<<<<<< HEAD
+            "preLaunchTask": "local-process-with-kubernetes.service"
+=======
+            "preLaunchTask": "bridge-to-kubernetes.service"
+>>>>>>> main/master
         },
         {
             "type": "node",
@@ -22,42 +26,6 @@
                 "debug"
             ],
             "port": 9229
-        },
-        {
-            "name": "Launch Server (Dev Spaces)",
-            "type": "node",
-            "request": "launch",
-            "protocol": "inspector",
-            "preLaunchTask": "dev-spaces: prelaunch",
-            "cwd": "${workspaceFolder}",
-            "runtimeExecutable": "azds",
-            "runtimeArgs": [
-                "exec",
-                "--on-exit-resume-up",
-                "--",
-                "node",
-                "--inspect=0.0.0.0:9229",
-                "--inspect-brk",
-                "--nolazy",
-                "server.js"
-            ],
-            "address": "127.0.0.1",
-            "port": 55147,
-            "localRoot": "${workspaceFolder}/.",
-            "remoteRoot": "/app"
-        },
-        {
-            "name": "Attach to Server (Dev Spaces)",
-            "type": "node",
-            "request": "attach",
-            "protocol": "inspector",
-            "preLaunchTask": "dev-spaces: preattach",
-            "cwd": "${workspaceFolder}",
-            "address": "127.0.0.1",
-            "port": 55147,
-            "localRoot": "${workspaceFolder}/.",
-            "remoteRoot": "/app",
-            "restart": true
         }
     ]
 }

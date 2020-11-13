@@ -7,99 +7,89 @@ on:
     paths:
       - Bikes/**
 
+env:
+  # azure
+  resourceGroup: twt2020jd
+  nameSpace: twt
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
     steps:
-      - uses: actions/checkout@master
+      - name: "Checkout branch"
+        uses: actions/checkout@v2
 
-      - uses: azure/docker-login@v1
+      - name: "Login via Azure CLI"
+        uses: azure/login@v1
         with:
-          login-server: ${{ secrets.CONTAINER_REGISTRY }}
-          username: ${{ secrets.REGISTRY_USERNAME }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: "Set PR Environment"
+        run: |
+          # set for this step
+          AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)
+
+          echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
+
+          echo "::set-env name=INGRESS::bikeapp.bikesharingweb.52.188.35.131.nip.io"
+
+          echo "Retrieving Container Registry info..."
+
+          acrName=$(az acr list -g $resourceGroup -o tsv --query [0].name)
+          CONTAINER_REGISTRY=$(az acr list -g $resourceGroup -o tsv --query [0].loginServer)
+
+          # acr/container registry variables
+          echo "::set-env name=CONTAINER_REGISTRY::$(az acr list -g $resourceGroup -o tsv --query [0].loginServer)"
+
+          echo "::set-env name=REGISTRY_USERNAME::$(az acr credential show -n $acrName --query username -o tsv)"
+          echo "::set-env name=REGISTRY_PASSWORD::$(az acr credential show -n $acrName -o tsv --query passwords[0].value)"
+
+      # docker login
+      - name: "docker login"
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.CONTAINER_REGISTRY }}
+          username: ${{ env.REGISTRY_USERNAME }}
+          password: ${{ env.REGISTRY_PASSWORD }}
 
       - name: docker build
         run: |
-          docker build Bikes/ -t ${{ secrets.CONTAINER_REGISTRY }}/bikes:$GITHUB_SHA
-          docker push ${{ secrets.CONTAINER_REGISTRY }}/bikes:$GITHUB_SHA
+          docker build Bikes/ -t $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
+          docker push $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
 
       - uses: azure/aks-set-context@v1
         with:
           creds: "${{ secrets.AZURE_CREDENTIALS }}"
-          cluster-name: ${{ secrets.CLUSTER_NAME }}
-          resource-group: ${{ secrets.RESOURCE_GROUP }}
+          cluster-name: ${{ env.AKS_CLUSTER }}
+          resource-group: ${{ env.resourceGroup }}
 
-      - name: Create valid child namespace name
-        id: generate-child-space-name
+      - name: Create valid branch name
+        id: generate-valid-branch-name
         run: |
-          branch=${GITHUB_HEAD_REF::63}
+          branch=${GITHUB_HEAD_REF::63}        
           branch=$(echo ${branch//[!0-9a-zA-Z]/-} | tr '[:upper:]' '[:lower:]' | sed -e 's/^-/z/' -e 's/-$/z/')
           echo ::set-output name=result::$branch
 
-      # - name: Create child namespaces and add Dev Spaces labels
-      #   run: |
-      #     if [ -n "$(kubectl get namespace ${{steps.generate-child-space-name.outputs.result}} --ignore-not-found -o name)" ]; then exit 0; fi
-      #     kubectl create namespace ${{steps.generate-child-space-name.outputs.result}} \
-      #     kubectl label namespace ${{steps.generate-child-space-name.outputs.result}} \
-      #       azds.io/parent-space=${{ secrets.MASTER_SPACE }} \
-      #       azds.io/space=true \
-      #       azds.io/pull-request-space=true
-
-      - name: Create child namespaces and add Dev Spaces labels
-        run: |
-          if [ -n "$(kubectl get namespace $GITHUB_HEAD_REF --ignore-not-found -o name)" ]; then exit 0; fi
-          kubectl create namespace $GITHUB_HEAD_REF
-          kubectl label namespace $GITHUB_HEAD_REF azds.io/parent-space=${{ secrets.MASTER_SPACE }} 
-          kubectl label namespace $GITHUB_HEAD_REF azds.io/space=true
-          kubectl label namespace $GITHUB_HEAD_REF azds.io/pull-request-space=true
-
-      - uses: azure/k8s-create-secret@v1
-        with:
-          namespace: ${{ github.head_ref }}
-          container-registry-url: ${{ secrets.CONTAINER_REGISTRY }}
-          container-registry-username: ${{ secrets.REGISTRY_USERNAME }}
-          container-registry-password: ${{ secrets.REGISTRY_PASSWORD }}
-          secret-name: ${{ secrets.IMAGE_PULL_SECRET }}
-
-      - name: Create valid release-name
-        id: generate-release-name
-        run: |
-          release=bikes-$GITHUB_HEAD_REF
-          release=${release::53}
-          release=$(echo ${release//[!0-9a-zA-Z]/-} | tr '[:upper:]' '[:lower:]' | sed -e 's/^-/z/' -e 's/-$/z/')
-          echo ::set-output name=result::$release
-
-      - name: Install Helm for client
-        id: install-helm-client
-        run: |
-          set -e        
-          clientversion=$(helm version --client --short | cut -d' ' -f2 | cut -d'+' -f1 | head -c 2 | tail -c 1)
-          if [ "$clientversion" == 3]; then   
-            echo The client is already using Helm 3
-            echo ::set-output name=helm::helm
-          else
-            curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 > get_helm.sh
-            chmod 700 get_helm.sh
-            ./get_helm.sh --version v3.0.1
-            echo ::set-output name=helm::helm
-          fi
-
-      - name: Helm Upgrade PR
+      - name: Helm Install PR
         run: |
           cd Bikes/charts/bikes
-          ${{steps.install-helm-client.outputs.helm}} dependency update
-          ${{steps.install-helm-client.outputs.helm}} upgrade \
-            --install ${{steps.generate-release-name.outputs.result}} . \
-            --namespace $GITHUB_HEAD_REF \
-            --set image.repository=${{ secrets.CONTAINER_REGISTRY }}/bikes \
+          helm dependency update
+          helm upgrade \
+            --install ${{steps.generate-valid-branch-name.outputs.result}} . \
+            --namespace $nameSpace \
+            --set image.repository=$CONTAINER_REGISTRY/bikes \
             --set image.tag=$GITHUB_SHA \
-            --set imagePullSecrets[0].name=${{ secrets.IMAGE_PULL_SECRET }} \
-            --set ingress.hosts[0]=$GITHUB_HEAD_REF.s.${{ secrets.HOST }}
+            --set fullnameOverride=${{steps.generate-valid-branch.outputs.result}}
 
-      - uses: azure/dev-spaces/actions/add-review-url@Releases/v2
+      - name: Add routing labels
+        run: |
+          kubectl label pods --selector="app=bikes,release=${{steps.generate-valid-branch.outputs.result}}" routing.visualstudio.io/route-from=bikes -n $nameSpace --overwrite=true
+          
+          kubectl annotate pods --selector="app=bikes,release=${{steps.generate-valid-branch.outputs.result}}" routing.visualstudio.io/route-on-header=kubernetes-route-as=${{steps.generate-valid-branch-name.outputs.result}} -n $nameSpace --overwrite=true
+
+      - uses: jldeen/dev-spaces/actions/add-review-url@Releases/v2
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          host: ${{ secrets.HOST }}
-          child-space: ${{steps.generate-child-space-name.outputs.result}}
+          host: "${{ env.INGRESS }}"
+          branch-name: ${{steps.generate-valid-branch-name.outputs.result}}
           protocol: "http"

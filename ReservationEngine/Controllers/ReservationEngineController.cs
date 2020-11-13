@@ -21,7 +21,7 @@ namespace app.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateReservation([FromBody] Reservation reservationDetails)
         {
-            var requestId = new Guid(reservationDetails.RequestId);
+           var requestId = new Guid(reservationDetails.RequestId);
             LogUtility.LogWithContext(requestId, "Updating booking");
 
             try

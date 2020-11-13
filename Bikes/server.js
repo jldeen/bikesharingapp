@@ -20,7 +20,7 @@ console.log("MongoDB connection string: " + mongoDBConnStr);
 // Init to prototype to enable Intellisense
 var mongoDB = require('mongodb').Db.prototype;
 
-validate.validators.illegal = function (value, options, key, attributes) {
+validate.validators.illegal = function(value, options, key, attributes) {
     if (value !== undefined && options) {
         return "cannot be provided";
     }
@@ -51,7 +51,7 @@ var incomingBikeSchema = {
     },
     type: {
         presence: true,
-        inclusion: ["mountain", "road", "tandem"]
+        inclusion: [ "mountain", "road", "tandem" ]
     },
     ownerUserId: {
         presence: true
@@ -108,13 +108,13 @@ app.get('/api/availableBikes', function (req, res) {
     }
 
     var cursor = mongoDB.collection(mongoDBCollection).find(query).sort({ hourlyCost: 1 }).limit(30);
-    cursor.toArray(function (err, data) {
+    cursor.toArray(function(err, data) {
         if (err) {
             dbError(res, err, requestID);
             return;
         }
 
-        data.forEach(function (bike) {
+        data.forEach(function(bike) {
             bike.id = bike._id;
             delete bike._id;
         });
@@ -123,17 +123,17 @@ app.get('/api/availableBikes', function (req, res) {
     });
 });
 
-app.get('/api/allbikes', function (req, res) {
+app.get('/api/allbikes', function(req, res) {
     var requestID = req.header(requestIDHeaderName);
 
     var cursor = mongoDB.collection(mongoDBCollection).find({}).sort({ hourlyCost: 1 });
-    cursor.toArray(function (err, data) {
+    cursor.toArray(function(err, data) {
         if (err) {
             dbError(res, err, requestID);
             return;
         }
 
-        data.forEach(function (bike) {
+        data.forEach(function(bike) {
             bike.id = bike._id;
             delete bike._id;
         });
@@ -154,12 +154,12 @@ app.post('/api/bikes', function (req, res) {
     var newBike = req.body;
     newBike.available = true;
 
-    mongoDB.collection(mongoDBCollection).insertOne(newBike, function (err, result) {
+    mongoDB.collection(mongoDBCollection).insertOne(newBike, function(err, result) {
         if (err) {
             dbError(res, err, requestID);
             return;
         }
-
+        
         newBike.id = newBike._id;
         delete newBike._id;
         console.log(requestID + ' - inserted new bikeId: ' + newBike.id);
@@ -168,21 +168,22 @@ app.post('/api/bikes', function (req, res) {
 });
 
 // update bike ------------------------------------------------------------
-app.put('/api/bikes/:bikeId', function (req, res) {
+app.put('/api/bikes/:bikeId', function(req, res) {
     var requestID = req.header(requestIDHeaderName);
     var validationErrors = validate(req.body, incomingBikeSchema);
     if (validationErrors) {
         res.status(400).send(validationErrors);
         return;
     }
-    if (!ObjectId.isValid(req.params.bikeId)) {
+    if (!ObjectId.isValid(req.params.bikeId))
+    {
         res.status(400).send(req.params.bikeId + ' is not a valid bikeId!');
         return;
     }
 
     var updatedBike = req.body;
 
-    mongoDB.collection(mongoDBCollection).updateOne({ _id: new ObjectId(req.params.bikeId) }, { $set: updatedBike }, function (err, result) {
+    mongoDB.collection(mongoDBCollection).updateOne({ _id: new ObjectId(req.params.bikeId) }, { $set: updatedBike }, function(err, result) {
         if (err) {
             dbError(res, err, requestID);
             return;
@@ -207,18 +208,19 @@ app.put('/api/bikes/:bikeId', function (req, res) {
 });
 
 // get bike ------------------------------------------------------------
-app.get('/api/bikes/:bikeId', function (req, res) {
+app.get('/api/bikes/:bikeId', function(req, res) {
     var requestID = req.header(requestIDHeaderName);
     if (!req.params.bikeId) {
         res.status(400).send('Must specify bikeId');
         return;
     }
-    if (!ObjectId.isValid(req.params.bikeId)) {
+    if (!ObjectId.isValid(req.params.bikeId))
+    {
         res.status(400).send(req.params.bikeId + ' is not a valid bikeId!');
         return;
     }
 
-    mongoDB.collection(mongoDBCollection).findOne({ _id: new ObjectId(req.params.bikeId) }, function (err, result) {
+    mongoDB.collection(mongoDBCollection).findOne({ _id: new ObjectId(req.params.bikeId) }, function(err, result) {
         if (err) {
             dbError(res, err, requestID);
             return;
@@ -239,18 +241,19 @@ app.get('/api/bikes/:bikeId', function (req, res) {
 });
 
 // delete bike ------------------------------------------------------------
-app.delete('/api/bikes/:bikeId', function (req, res) {
+app.delete('/api/bikes/:bikeId', function(req, res) {
     var requestID = req.header(requestIDHeaderName);
     if (!req.params.bikeId) {
         res.status(400).send('Must specify bikeId');
         return;
     }
-    if (!ObjectId.isValid(req.params.bikeId)) {
+    if (!ObjectId.isValid(req.params.bikeId))
+    {
         res.status(400).send(req.params.bikeId + ' is not a valid bikeId!');
         return;
     }
-
-    mongoDB.collection(mongoDBCollection).deleteOne({ _id: new ObjectId(req.params.bikeId) }, function (err, result) {
+    
+    mongoDB.collection(mongoDBCollection).deleteOne({ _id: new ObjectId(req.params.bikeId) }, function(err, result) {
         if (err) {
             dbError(res, err, requestID);
             return;
@@ -265,13 +268,13 @@ app.delete('/api/bikes/:bikeId', function (req, res) {
             res.status(500).send(msg);
             return;
         }
-
+        
         res.sendStatus(200);
     });
 });
 
 // reserve bike ------------------------------------------------------------
-app.patch('/api/bikes/:bikeId/reserve', function (req, res) {
+app.patch('/api/bikes/:bikeId/reserve', function(req, res) {
     var requestID = req.header(requestIDHeaderName);
     if (!req.params.bikeId) {
         res.status(400).send('Must specify bikeId');
@@ -282,7 +285,7 @@ app.patch('/api/bikes/:bikeId/reserve', function (req, res) {
 });
 
 // clear bike ------------------------------------------------------------
-app.patch('/api/bikes/:bikeId/clear', function (req, res) {
+app.patch('/api/bikes/:bikeId/clear', function(req, res) {
     var requestID = req.header(requestIDHeaderName);
     if (!req.params.bikeId) {
         res.status(400).send('Must specify bikeId');
@@ -293,19 +296,20 @@ app.patch('/api/bikes/:bikeId/clear', function (req, res) {
 });
 
 function processReservation(res, bikeId, changeTo, requestID) {
-    if (!ObjectId.isValid(bikeId)) {
+    if (!ObjectId.isValid(bikeId))
+    {
         res.status(400).send(bikeId + ' is not a valid bikeId!');
         return;
     }
 
-    mongoDB.collection(mongoDBCollection).updateOne({ _id: new ObjectId(bikeId), available: !changeTo }, { $set: { available: changeTo } }, function (err, result) {
+    mongoDB.collection(mongoDBCollection).updateOne({ _id: new ObjectId(bikeId), available: !changeTo }, { $set: { available: changeTo } }, function(err, result) {
         if (err) {
             dbError(res, err, requestID);
             return;
         }
         if (result.matchedCount === 0) {
             // Figure out if bike does not exist or if it was invalid reservation request
-            mongoDB.collection(mongoDBCollection).findOne({ _id: new ObjectId(bikeId) }, function (err, result) {
+            mongoDB.collection(mongoDBCollection).findOne({ _id: new ObjectId(bikeId) }, function(err, result) {
                 if (err) {
                     dbError(res, err, requestID);
                     return;
@@ -319,7 +323,7 @@ function processReservation(res, bikeId, changeTo, requestID) {
                     res.status(400).send('Invalid reservation request was made for BikeId ' + bikeId);
                 }
             });
-
+            
             return;
         }
         if (result.matchedCount !== 1 && result.modifiedCount !== 1) {
@@ -342,7 +346,7 @@ function dbError(res, err, requestID) {
     res.status(500).send(err);
 }
 
-app.get('/hello', function (req, res) {
+app.get('/hello', function(req, res) {
     res.status(200).send('hello!\n');
 });
 
@@ -371,12 +375,12 @@ process.on("SIGTERM", () => {
 });
 
 function tryMongoConnect(callback, results) {
-    MongoClient.connect(mongoDBConnStr, { useUnifiedTopology: true }, function (err, db) {
+    MongoClient.connect(mongoDBConnStr, { useUnifiedTopology: true }, function(err, db) {
         if (err) {
             console.error("Mongo connection error!");
             console.error(err);
         }
-
+        
         if (db) {
             callback(err, db.db(mongoDBDatabase));
         } else {
@@ -385,7 +389,7 @@ function tryMongoConnect(callback, results) {
     });
 }
 
-async.retry({ times: 10, interval: 1000 }, tryMongoConnect, function (err, result) {
+async.retry({times: 10, interval: 1000}, tryMongoConnect, function(err, result) {
     if (err) {
         console.error("Couldn't connect to Mongo! Giving up.");
         console.error(err);
@@ -394,7 +398,7 @@ async.retry({ times: 10, interval: 1000 }, tryMongoConnect, function (err, resul
 
     console.log("Connected to MongoDB");
     mongoDB = result;
-    mongoDB.on('close', function () {
+    mongoDB.on('close', function() {
         if (mongoDB) { // SIGINT and SIGTERM
             console.log('Mongo connection closed! Shutting down.');
             process.exit(1);
