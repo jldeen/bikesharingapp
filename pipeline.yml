@@ -1,4 +1,25 @@
 resources:
+  - name: GitHub
+    type: GitRepo
+    configuration:
+      gitProvider: JldeenGitHub  # replace with your integration
+      path: jldeen/bikesharingapp # replace with your repository name
+      files:
+        include: Bikes/**
+        exclude: pipeline.yml
+      branches:
+        include: master
+      buildOn:
+         pullRequestCreate: true
+      cancelPendingRunsOn:
+        pullRequestUpdate: true
+
+  - name: buildInfo
+    type: buildInfo
+    configuration:
+      sourceArtifactory: Artifactory
+      buildName: ${pipeline_name}
+      buildNumber: ${run_number}
 
 pipelines:
   - name: PR_Bikes_Api
