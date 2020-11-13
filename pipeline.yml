@@ -5,7 +5,7 @@ resources:
       gitProvider: JldeenGitHub  # replace with your integration
       path: jldeen/bikesharingapp # replace with your repository name
       files:
-        # include: Bikes/**
+        include: Bikes/
         exclude: pipeline.yml
       branches:
         include: master
@@ -73,7 +73,7 @@ pipelines:
             - echo $branch
             - printenv | grep res_GitHub_
             - branch=$(echo ${branch//[!0-9a-zA-Z]/-} | tr '[:upper:]' '[:lower:]' | sed -e 's/^-/z/' -e 's/-$/z/')
-            - add_run_variables result="jfrog-pipelines"
+            - add_run_variables result="bike-image-fix"
       
       - name: helmPRInstall
         type: HelmDeploy
@@ -88,9 +88,9 @@ pipelines:
                 versions:
                   - "12.18.2"
           releaseName: ${result}
-          chartPath: Bikes/charts/bikes
-          flags: "--namespace $nameSpace . --set image.repository=jldeen.jfrog.io/images/bikes 
-          --set image.tag=${run_number} --set fullnameOverride=$result --set imagePullSecrets.name=$result"
+          chartPath: ./Bikes/charts/bikes
+          flags: "--namespace $nameSpace --set image.repository=jldeen.jfrog.io/images/bikes 
+          --set image.tag=${run_number} --set fullnameOverride=$result --set imagePullSecrets.name=$result ."
           # affinityGroup: cartapi
           inputResources:
             - name: GitHub
