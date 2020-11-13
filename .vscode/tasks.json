@@ -3,7 +3,7 @@
     "tasks": [
         {
             "label": "build",
-            "command": "dotnet",
+            "command": "/usr/local/bin/dotnet",
             "type": "process",
             "args": [
                 "build",
@@ -15,7 +15,7 @@
         },
         {
             "label": "publish",
-            "command": "dotnet",
+            "command": "/usr/local/bin/dotnet",
             "type": "process",
             "args": [
                 "publish",
@@ -27,7 +27,7 @@
         },
         {
             "label": "watch",
-            "command": "dotnet",
+            "command": "/usr/local/bin/dotnet",
             "type": "process",
             "args": [
                 "watch",
@@ -37,6 +37,23 @@
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "bridge-to-kubernetes.service",
+            "type": "bridge-to-kubernetes.service",
+            "service": "bikes",
+            "ports": [
+                3000
+            ],
+            "isolateAs": "jessicad-7d57"
+        },
+        {
+            "label": "bridge-to-kubernetes.compound",
+            "dependsOn": [
+                "bridge-to-kubernetes.service",
+                "build"
+            ],
+            "dependsOrder": "sequence"
         }
     ]
 }
