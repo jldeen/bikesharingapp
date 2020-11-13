@@ -231,6 +231,7 @@ app.get('/api/bikes/:bikeId', function(req, res) {
         }
 
         var theBike = result;
+        // Test comment
         // Hard code image url *FIX ME*
         // theBike.imageUrl = "/static/logo.svg";
         theBike.id = theBike._id;
