@@ -10,7 +10,7 @@ on:
 env:
   # azure
   resourceGroup: twt2020jd
-  nameSpace: twt
+  nameSpace: bikeapp
 
 jobs:
   build:
