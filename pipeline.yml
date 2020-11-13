@@ -5,7 +5,7 @@ resources:
       gitProvider: JldeenGitHub  # replace with your integration
       path: jldeen/bikesharingapp # replace with your repository name
       files:
-        include: Bikes/**
+        # include: Bikes/**
         exclude: pipeline.yml
       branches:
         include: master
