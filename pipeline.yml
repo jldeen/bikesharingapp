@@ -1,0 +1,139 @@
+resources:
+  - name: GitHub
+    type: GitRepo
+    configuration:
+      gitProvider: JldeenGitHub  # replace with your integration
+      path: jldeen/bikesharingapp # replace with your repository name
+      files:
+        include: Bikes/**
+        exclude: pipeline.yml
+      branches:
+        include: master
+      buildOn:
+         pullRequestCreate: true
+      cancelPendingRunsOn:
+        pullRequestUpdate: true
+
+  - name: buildInfo
+    type: buildInfo
+    configuration:
+      sourceArtifactory: Artifactory
+      buildName: ${pipeline_name}
+      buildNumber: ${run_number}
+
+pipelines:
+  - name: PR_Bikes_Api
+    configuration:
+      environmentVariables:
+        readOnly:
+          resourceGroup: twt2020jd
+          nameSpace: bikeapp
+          INGRESS: bikeapp.bikesharingweb.52.188.35.131.nip.io
+
+    steps:
+      - name: dockerBuild
+        type: DockerBuild
+        configuration:
+          dockerFileLocation: Bikes/
+          dockerFileName: Dockerfile
+          dockerImageName: jldeen.jfrog.io/images/bikes      # replace with your fully qualified Docker registry/image name
+          dockerImageTag: ${run_number}
+          affinityGroup: bikes
+          inputResources:
+            - name: GitHub
+          integrations:
+            - name: Artifactory
+
+      - name: dockerPush
+        type: DockerPush
+        configuration:
+          autoPublishBuildInfo: true
+          forceXrayScan: true
+          targetRepository: images
+          affinityGroup: bikes
+          integrations:
+            - name: Artifactory   
+          inputSteps:
+            - name: dockerBuild
+          outputResources:
+            - name: buildInfo
+
+      - name: createValidBranchName
+        type: bash
+        configuration:
+          # affinityGroup: cartapi
+          inputResources:
+            - name: GitHub
+            - name: buildInfo
+          inputSteps:
+            - name: dockerPush 
+        execution:
+          onExecute:
+            - branch=$res_GitHub_headCommitRef
+            - echo $branch
+            - printenv | grep res_GitHub_
+            - branch=$(echo ${branch//[!0-9a-zA-Z]/-} | tr '[:upper:]' '[:lower:]' | sed -e 's/^-/z/' -e 's/-$/z/')
+            - add_run_variables result="jfrog-pipelines"
+      
+      - name: helmPRInstall
+        type: HelmDeploy
+        configuration:
+          #inherits from bash
+          helmVersion: 3
+          runtime:
+            type: image
+            image:
+              auto:
+                language: node
+                versions:
+                  - "12.18.2"
+          releaseName: ${result}
+          chartPath: Bikes/charts/bikes
+          flags: "--namespace $nameSpace . --set image.repository=jldeen.jfrog.io/images/bikes 
+          --set image.tag=${run_number} --set fullnameOverride=$result --set imagePullSecrets.name=$result"
+          # affinityGroup: cartapi
+          inputResources:
+            - name: GitHub
+          inputSteps:
+            - name: createValidBranchName
+          integrations:
+            - name: AKS
+            - name: Artifactory
+        execution:
+          onStart:
+            - secretCheck=$(kubectl get secrets -n $nameSpace --field-selector type=kubernetes.io/dockerconfigjson | grep "$result" || true)
+            - if [[ $secretCheck ]]; then echo "$result k8s secret already exists!"; else kubectl create secret docker-registry $result -n $nameSpace --docker-server=int_Artifactory_url --docker-username=int_Artifactory_user --docker-password=int_Artifactory_apikey && echo "$result k8s secret created!"; fi
+
+      - name: addRoutingLabels
+        type: bash
+        configuration:
+          # affinityGroup: cartapi
+          inputResources:
+            - name: GitHub
+          inputSteps:
+            - name: helmPRInstall
+          integrations:
+            - name: AKS
+        execution:
+          onExecute:
+          - kubectl label pods --selector="app=bikes,release=$result" routing.visualstudio.io/route-from=bikes -n $nameSpace --overwrite=true
+          - kubectl annotate pods --selector="app=bikes,release=$result" routing.visualstudio.io/route-on-header=kubernetes-route-as=$result -n $nameSpace --overwrite=true
+      
+      - name: addGitHubFQDN
+        type: bash
+        configuration:
+          # affinityGroup: cartapi
+          inputResources:
+            - name: GitHub
+          inputSteps:
+            - name: addRoutingLabels
+          environmentVariables:
+            GITHUB_TOKEN: ${res_GitHub_gitProvider_token}
+            GITHUB_OWNER: jldeen
+            GITHUB_REPO: bikesharingapp
+            GITHUB_COMMENT_TYPE: pr
+            GITHUB_PR_ISSUE_NUMBER: ${res_GitHub_pullRequestNumber}
+        execution:
+          onExecute: 
+            - docker run -i --rm -e GITHUB_TOKEN -e GITHUB_OWNER -e GITHUB_REPO -e GITHUB_COMMENT_TYPE -e GITHUB_PR_ISSUE_NUMBER -e GITHUB_COMMENT cloudposse/github-commenter -comment "You can see a private version of the changes made in this pull request  here - http://${result}.$INGRESS"
+
