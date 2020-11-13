@@ -5,7 +5,7 @@ resources:
       gitProvider: JldeenGitHub  # replace with your integration
       path: jldeen/bikesharingapp # replace with your repository name
       files:
-        include: Bikes/**
+        include: Bikes/
         exclude: pipeline.yml
       branches:
         include: master
@@ -73,7 +73,7 @@ pipelines:
             - echo $branch
             - printenv | grep res_GitHub_
             - branch=$(echo ${branch//[!0-9a-zA-Z]/-} | tr '[:upper:]' '[:lower:]' | sed -e 's/^-/z/' -e 's/-$/z/')
-            - add_run_variables result="jfrog-pipelines"
+            - add_run_variables result="bike-image-fix"
       
       - name: helmPRInstall
         type: HelmDeploy
@@ -88,8 +88,8 @@ pipelines:
                 versions:
                   - "12.18.2"
           releaseName: ${result}
-          chartPath: Bikes/charts/bikes
-          flags: "--namespace $nameSpace . --set image.repository=jldeen.jfrog.io/images/bikes 
+          chartPath: ./Bikes/charts/bikes
+          flags: "--namespace $nameSpace -f values.yaml --set image.repository=jldeen.jfrog.io/images/bikes 
           --set image.tag=${run_number} --set fullnameOverride=$result --set imagePullSecrets.name=$result"
           # affinityGroup: cartapi
           inputResources:
@@ -136,4 +136,3 @@ pipelines:
         execution:
           onExecute: 
             - docker run -i --rm -e GITHUB_TOKEN -e GITHUB_OWNER -e GITHUB_REPO -e GITHUB_COMMENT_TYPE -e GITHUB_PR_ISSUE_NUMBER -e GITHUB_COMMENT cloudposse/github-commenter -comment "You can see a private version of the changes made in this pull request  here - http://${result}.$INGRESS"
-
