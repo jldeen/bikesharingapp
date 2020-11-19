@@ -55,9 +55,8 @@ jobs:
 
       - name: docker build
         run: |
-          echo $CONTAINER_REGISTRY $REGISTRY_USERNAME $INGRESS
           docker build Bikes/ -t ${{ env.CONTAINER_REGISTRY }}/bikes:$GITHUB_SHA
-          docker push $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
+          docker push ${{ env.CONTAINER_REGISTRY }}/bikes:$GITHUB_SHA
 
       - uses: azure/aks-set-context@v1
         with:
