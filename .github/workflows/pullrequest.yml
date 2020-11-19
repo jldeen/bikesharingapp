@@ -27,22 +27,23 @@ jobs:
       - name: "Set PR Environment"
         run: |
           # set for this step
-          AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)
+          AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv) >> $GITHUB_ENV
 
-          echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
+          #echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
 
-          echo "::set-env name=INGRESS::bikeapp.bikesharingweb.52.188.35.131.nip.io"
+          #echo "::set-env name=INGRESS::bikeapp.bikesharingweb.52.188.35.131.nip.io"
 
-          echo "Retrieving Container Registry info..."
+          #echo "Retrieving Container Registry info..."
 
           acrName=$(az acr list -g $resourceGroup -o tsv --query [0].name)
-          CONTAINER_REGISTRY=$(az acr list -g $resourceGroup -o tsv --query [0].loginServer)
+          CONTAINER_REGISTRY=$(az acr list -g $resourceGroup -o tsv --query [0].loginServer) >> $GITHUB_ENV
+          REGISTRY_USERNAME=$(az acr credential show -n $acrName --query username -o tsv) >> $GITHUB_ENV
+          REGISTRY_PASSWORD=$(az acr credential show -n $acrName -o tsv --query passwords[0].value) >> $GITHUB_ENV
 
           # acr/container registry variables
-          echo "::set-env name=CONTAINER_REGISTRY::$(az acr list -g $resourceGroup -o tsv --query [0].loginServer)"
-
-          echo "::set-env name=REGISTRY_USERNAME::$(az acr credential show -n $acrName --query username -o tsv)"
-          echo "::set-env name=REGISTRY_PASSWORD::$(az acr credential show -n $acrName -o tsv --query passwords[0].value)"
+          #echo "::set-env name=CONTAINER_REGISTRY::$(az acr list -g $resourceGroup -o tsv --query [0].loginServer)"
+          #echo "::set-env name=REGISTRY_USERNAME::$(az acr credential show -n $acrName --query username -o tsv)"
+          #echo "::set-env name=REGISTRY_PASSWORD::$(az acr credential show -n $acrName -o tsv --query passwords[0].value)"
 
       # docker login
       - name: "docker login"
