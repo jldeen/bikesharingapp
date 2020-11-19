@@ -33,6 +33,8 @@ jobs:
 
           #echo "::set-env name=INGRESS::bikeapp.bikesharingweb.52.188.35.131.nip.io"
 
+          INGRESS=bikeapp.bikesharingweb.52.188.35.131.nip.io >> $GITHUB_ENV
+
           #echo "Retrieving Container Registry info..."
 
           acrName=$(az acr list -g $resourceGroup -o tsv --query [0].name)
@@ -49,9 +51,9 @@ jobs:
       - name: "docker login"
         uses: azure/docker-login@v1
         with:
-          login-server: ${{ env.CONTAINER_REGISTRY }}
-          username: ${{ env.REGISTRY_USERNAME }}
-          password: ${{ env.REGISTRY_PASSWORD }}
+          login-server: $CONTAINER_REGISTRY
+          username: $REGISTRY_USERNAME
+          password: $REGISTRY_PASSWORD
 
       - name: docker build
         run: |
@@ -61,7 +63,7 @@ jobs:
       - uses: azure/aks-set-context@v1
         with:
           creds: "${{ secrets.AZURE_CREDENTIALS }}"
-          cluster-name: ${{ env.AKS_CLUSTER }}
+          cluster-name: $AKS_CLUSTER
           resource-group: ${{ env.resourceGroup }}
 
       - name: Create valid branch name
