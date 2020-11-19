@@ -27,25 +27,23 @@ jobs:
       - name: "Set PR Environment"
         run: |
           # set for this step
-          AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv) >> $GITHUB_ENV
-
-          #echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
-
-          #echo "::set-env name=INGRESS::bikeapp.bikesharingweb.52.188.35.131.nip.io"
+          AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv) && echo $AKS_CLUSTER
+          AKS_CLUSTER=$AKS_CLUSTER >> $GITHUB_ENV
 
           INGRESS=bikeapp.bikesharingweb.52.188.35.131.nip.io >> $GITHUB_ENV
 
-          #echo "Retrieving Container Registry info..."
+          echo "Retrieving Container Registry info..."
 
-          acrName=$(az acr list -g $resourceGroup -o tsv --query [0].name)
-          CONTAINER_REGISTRY=$(az acr list -g $resourceGroup -o tsv --query [0].loginServer) >> $GITHUB_ENV
-          REGISTRY_USERNAME=$(az acr credential show -n $acrName --query username -o tsv) >> $GITHUB_ENV
-          REGISTRY_PASSWORD=$(az acr credential show -n $acrName -o tsv --query passwords[0].value) >> $GITHUB_ENV
+          acrName=$(az acr list -g $resourceGroup -o tsv --query [0].name) && echo $acrName
+          
+          CONTAINER_REGISTRY=$(az acr list -g $resourceGroup -o tsv --query [0].loginServer) 
+          CONTAINER_REGISTRY=$CONTAINER_REGISTRY >> $GITHUB_ENV
 
-          # acr/container registry variables
-          #echo "::set-env name=CONTAINER_REGISTRY::$(az acr list -g $resourceGroup -o tsv --query [0].loginServer)"
-          #echo "::set-env name=REGISTRY_USERNAME::$(az acr credential show -n $acrName --query username -o tsv)"
-          #echo "::set-env name=REGISTRY_PASSWORD::$(az acr credential show -n $acrName -o tsv --query passwords[0].value)"
+          REGISTRY_USERNAME=$(az acr credential show -n $acrName --query username -o tsv) && echo $REGISTRY_USERNAME
+          REGISTRY_USERNAME=$REGISTRY_USERNAME >> $GITHUB_ENV
+
+          REGISTRY_PASSWORD=$(az acr credential show -n $acrName -o tsv --query passwords[0].value) 
+          REGISTRY_PASSWORD=$REGISTRY_PASSWORD >> $GITHUB_ENV
 
       # docker login
       - name: "docker login"
