@@ -57,6 +57,7 @@ jobs:
 
       - name: docker build
         run: |
+          echo $CONTAINER_REGISTRY $REGISTRY_USERNAME $INGRESS
           docker build Bikes/ -t $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
           docker push $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
 
