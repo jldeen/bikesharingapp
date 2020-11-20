@@ -53,14 +53,10 @@ jobs:
           username: ${{ env.REGISTRY_USERNAME }}
           password: ${{ SECRETS.REGISTRY_PASSWORD}}
       
-      - name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          context: Bikes/
-          file: ./Dockerfile
-          push: true
-          tags: ${{ env.CONTAINER_REGISTRY }}/bikes:${{ env.GITHUB_SHA }}
+      - name: docker build
+        run: |
+          docker build Bikes/ -t $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
+          docker push $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
 
       - uses: azure/aks-set-context@v1
         with:
