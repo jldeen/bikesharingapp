@@ -30,7 +30,7 @@ jobs:
 
           echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
 
-          echo "AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)" $GITHUB_ENV
+          echo "AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)" >> $GITHUB_ENV
 
           echo "INGRESS=bikeapp.bikesharingweb.52.188.35.131.nip.io" >> $GITHUB_ENV
 
@@ -41,20 +41,24 @@ jobs:
 
           echo "REGISTRY_USERNAME=$(az acr credential show -n $acrName --query username -o tsv)" >> $GITHUB_ENV
 
-          echo "REGISTRY_PASSWORD=$(az acr credential show -n $acrName -o tsv --query passwords[0].value)" >> $GITHUB_ENV
+          # echo "REGISTRY_PASSWORD=$(az acr credential show -n $acrName -o tsv --query passwords[0].value)" >> $GITHUB_ENV
 
       # docker login
       - name: "docker login"
-        uses: azure/docker-login@v1
+        uses: docker/login-action@v1
         with:
           login-server: $CONTAINER_REGISTRY
           username: $REGISTRY_USERNAME
-          password: $REGISTRY_PASSWORD
-
-      - name: docker build
-        run: |
-          docker build Bikes/ -t $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
-          docker push $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
+          password: ${{ SECRETS.REGISTRY_PASSWORD}}
+      
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: Bikes/
+          file: ./Dockerfile
+          push: true
+          tags: $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
 
       - uses: azure/aks-set-context@v1
         with:
