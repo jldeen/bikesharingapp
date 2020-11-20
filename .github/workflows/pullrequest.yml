@@ -58,7 +58,7 @@ jobs:
           context: Bikes/
           file: ./Dockerfile
           push: true
-          tags: ${{ env.CONTAINER_REGISTRY }}/bikes:${GITHUB_SHA}
+          tags: ${{ env.CONTAINER_REGISTRY }}/bikes:{$GITHUB_SHA}
 
       - uses: azure/aks-set-context@v1
         with:
