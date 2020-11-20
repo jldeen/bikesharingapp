@@ -28,7 +28,7 @@ jobs:
         run: |
           # set for this step
 
-          "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
+          echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
 
           echo "AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)" $GITHUB_ENV
 
