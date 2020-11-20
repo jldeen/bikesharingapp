@@ -42,6 +42,8 @@ jobs:
           echo "REGISTRY_USERNAME=$(az acr credential show -n $acrName --query username -o tsv)" >> $GITHUB_ENV
 
           # echo "REGISTRY_PASSWORD=$(az acr credential show -n $acrName -o tsv --query passwords[0].value)" >> $GITHUB_ENV
+           
+          echo "GITHUB_SHA=$GITHUB_SHA" >> $GITHUB_ENV
 
       # docker login
       - name: "docker login"
@@ -58,7 +60,7 @@ jobs:
           context: Bikes/
           file: ./Dockerfile
           push: true
-          tags: ${{ env.CONTAINER_REGISTRY }}/bikes:{$GITHUB_SHA}
+          tags: ${{ env.CONTAINER_REGISTRY }}/bikes:${{ env.GITHUB_SHA }}
 
       - uses: azure/aks-set-context@v1
         with:
