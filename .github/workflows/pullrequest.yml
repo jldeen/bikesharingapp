@@ -27,23 +27,21 @@ jobs:
       - name: "Set PR Environment"
         run: |
           # set for this step
-          AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv) && echo $AKS_CLUSTER
-          AKS_CLUSTER=$AKS_CLUSTER >> $GITHUB_ENV
 
-          INGRESS=bikeapp.bikesharingweb.52.188.35.131.nip.io >> $GITHUB_ENV
+          "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
+
+          echo "AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)" $GITHUB_ENV
+
+          echo "INGRESS=bikeapp.bikesharingweb.52.188.35.131.nip.io" >> $GITHUB_ENV
 
           echo "Retrieving Container Registry info..."
-
-          acrName=$(az acr list -g $resourceGroup -o tsv --query [0].name) && echo $acrName
+          acrName=$(az acr list -g $resourceGroup -o tsv --query [0].name)
           
-          CONTAINER_REGISTRY=$(az acr list -g $resourceGroup -o tsv --query [0].loginServer) && echo $CONTAINER_REGISTRY
-          CONTAINER_REGISTRY=$CONTAINER_REGISTRY >> $GITHUB_ENV
+          echo "CONTAINER_REGISTRY=$(az acr list -g $resourceGroup -o tsv --query [0].loginServer)" >> $GITHUB_ENV
 
-          REGISTRY_USERNAME=$(az acr credential show -n $acrName --query username -o tsv) && echo $REGISTRY_USERNAME
-          REGISTRY_USERNAME=$REGISTRY_USERNAME >> $GITHUB_ENV
+          echo "REGISTRY_USERNAME=$(az acr credential show -n $acrName --query username -o tsv)" >> $GITHUB_ENV
 
-          REGISTRY_PASSWORD=$(az acr credential show -n $acrName -o tsv --query passwords[0].value) 
-          REGISTRY_PASSWORD=$REGISTRY_PASSWORD >> $GITHUB_ENV
+          echo "REGISTRY_PASSWORD=$(az acr credential show -n $acrName -o tsv --query passwords[0].value)" >> $GITHUB_ENV
 
       # docker login
       - name: "docker login"
@@ -55,8 +53,8 @@ jobs:
 
       - name: docker build
         run: |
-          docker build Bikes/ -t ${{ env.CONTAINER_REGISTRY }}/bikes:$GITHUB_SHA
-          docker push ${{ env.CONTAINER_REGISTRY }}/bikes:$GITHUB_SHA
+          docker build Bikes/ -t $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
+          docker push $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
 
       - uses: azure/aks-set-context@v1
         with:
