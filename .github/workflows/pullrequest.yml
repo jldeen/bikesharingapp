@@ -47,8 +47,8 @@ jobs:
       - name: "docker login"
         uses: docker/login-action@v1
         with:
-          registry: $CONTAINER_REGISTRY
-          username: $REGISTRY_USERNAME
+          registry: ${CONTAINER_REGISTRY}
+          username: ${REGISTRY_USERNAME}
           password: ${{ SECRETS.REGISTRY_PASSWORD}}
       
       - name: Build and push
