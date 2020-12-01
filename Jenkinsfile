@@ -156,7 +156,7 @@ volumes:[
         )
       }
   }
-    deploy only the master branch
+    // deploy only the master branch
     if (env.BRANCH_NAME == 'bike-image-fix') {
       stage ('deploy to k8s') {
           // Deploy using Helm chart
