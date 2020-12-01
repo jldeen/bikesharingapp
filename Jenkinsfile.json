@@ -1,0 +1,34 @@
+{
+  "app": {
+    "name": "bike-share",
+    "replicas": "1",
+    "cpu": "10m",
+    "memory": "128Mi",
+    "test": true,
+    "hostname": "bikeshare.k8s.az.jessicadeen.com"
+  },
+  "k8s_secret": {
+    "name": "bike-share-secrets"
+  },
+  "container_repo": {
+    "host": "ttacrdl53e2sgw5z5i.azurecr.io",
+    "master_acct": "ttacrdl53e2sgw5z5i",
+    "alt_acct": "ttacrdl53e2sgw5z5i",
+    "jenkins_creds_id": "ttacrdl53e2sgw5z5i",
+    "repo": "bikeshare",
+    "dockeremail": ".",
+    "dockerfile": "./"
+  },
+  "az_sub": {
+    "jenkins_creds_id": "azjdsub",
+    "appid": "349273fe-7811-49e7-b2f9-cf840325bbd4",
+    "helmReg": "jdk8s"
+  },
+  "pipeline": {
+      "enabled": true,
+      "debug": false,
+      "library": {
+        "branch": "dev"
+      }
+  }
+}
