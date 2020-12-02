@@ -128,7 +128,7 @@ volumes:[
       }
   }
     // deploy only the master branch
-    if (env.BRANCH_NAME == 'PR-*') {
+    if (env.CHANGE_ID) {
       stage ('deploy to k8s') {
           // Deploy using Helm chart
         container('helm') {
