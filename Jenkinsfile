@@ -140,8 +140,8 @@ volumes:[
             namespace     : config.app.namespace,
             chart_dir     : chart_dir,
             set           : [
-              "image.Tag": image_tags_list.get(0),
-              "image.repository": config.container_repo.host/config.container_repo.repo,
+              "image.tag": image_tags_list.get(0),
+              "image.repository": config.container_repo.host/bikes,
               "fullnameOverride": config.app.branch_name,
             ]
           )
