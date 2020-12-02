@@ -161,10 +161,6 @@ volumes:[
             sh "kubectl annotate pods --selector='app=bikes,release=${config.app.name}' routing.visualstudio.io/route-on-header=kubernetes-route-as=config.app.branch_name -n ${config.app.namespace} --overwrite=true"
         }
       }
-
-      // GitHub comment
-    //   stage ('GitHub PR Comment')
-    //     container('')
-    // }
+    }
   }
 }
