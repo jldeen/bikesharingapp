@@ -154,11 +154,18 @@ volumes:[
             }
 
             // Kubectl labels
-
-            // GitHub PR Comment
+            container('kubectl') {
+                kubectl label pods --selector="app=bikes,release=config.app.name" routing.visualstudio.io/route-from=bikes -n config.app.namespace --overwrite=true
+          
+                kubectl annotate pods --selector="app=bikes,release=config.app.name" routing.visualstudio.io/route-on-header=kubernetes-route-as=config.app.branch_name -n $nameSpace --overwrite=true
+            }
           }
         }
       }
-    }
+
+      // GitHub comment
+    //   stage ('GitHub PR Comment')
+    //     container('')
+    // }
   }
 }
