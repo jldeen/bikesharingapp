@@ -143,7 +143,7 @@ volumes:[
             set           : [
               "image.tag": image_tags_list.get(0),
               "image.repository": config.container_repo.image_repository,
-              "fullnameOverride": config.app.branch_name,
+              "fullnameOverride": config.app.branch_name
             ]
           )
           
@@ -167,15 +167,15 @@ volumes:[
         // withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: config.github.credsid,
         //             usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']])
         
-        withCredentials([string(credentialsId: 'github-api', variable: 'GITHUB_TOKEN')])
-
-        pipeline.githubConfidence(
-          GITHUB_OWNER                : jldeen,
-          GITHUB_REPO                 : bikesharingapp,
-          GITHUB_COMMENT_TYPE         : pr,
-          GITHUB_PR_ISSUE_NUMBER      : env.CHANGE_ID,
-          GITHUB_COMMENT              : "You can see a private version of the changes made in this  pull request  here - http://${config.app.hostname}"
-        )
+          withCredentials([string(credentialsId: 'github-api', variable: 'GITHUB_TOKEN')]) {
+            pipeline.githubConfidence(
+            GITHUB_OWNER                : jldeen,
+            GITHUB_REPO                 : bikesharingapp,
+            GITHUB_COMMENT_TYPE         : pr,
+            GITHUB_PR_ISSUE_NUMBER      : env.CHANGE_ID,
+            GITHUB_COMMENT              : "You can see a private version of the changes made in this  pull request  here - http://${config.app.hostname}"
+            )
+          }
         }
       }
     }
