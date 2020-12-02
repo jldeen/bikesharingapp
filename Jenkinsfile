@@ -10,6 +10,7 @@ def pipeline = new io.estrado.Pipeline()
 podTemplate(label: 'jenkins-pipeline', containers: [
     containerTemplate(name: 'jnlp', image: 'jenkinsci/jnlp-slave:3.35-2-alpine', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', resourceRequestCpu: '200m', resourceLimitCpu: '300m', resourceRequestMemory: '256Mi', resourceLimitMemory: '512Mi'),
     containerTemplate(name: 'docker', image: 'docker:latest', command: 'cat', ttyEnabled: true),
+    containerTemplate(name: 'commenter', image: 'cloudposse/github-commenter:latest', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:v3.3.4', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.19.3', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'azcli', image: 'microsoft/azure-cli:latest', command: 'cat', ttyEnabled: true)
@@ -127,7 +128,7 @@ volumes:[
       }
   }
     // deploy only the master branch
-    if (env.BRANCH_NAME == 'main') {
+    if (env.BRANCH_NAME == 'PR-*') {
       stage ('deploy to k8s') {
           // Deploy using Helm chart
         container('helm') {
@@ -159,6 +160,22 @@ volumes:[
             sh "kubectl label pods --selector='app=bikes,release=${config.app.name}' routing.visualstudio.io/route-from=bikes -n ${config.app.namespace} --overwrite=true"
         
             sh "kubectl annotate pods --selector='app=bikes,release=${config.app.name}' routing.visualstudio.io/route-on-header=kubernetes-route-as='${config.app.branch_name}' -n ${config.app.namespace} --overwrite=true"
+        }
+      }
+      stage ('GitHub Confidence Step') {
+        container('commenter') {
+        // withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: config.github.credsid,
+        //             usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']])
+        
+        withCredentials([string(credentialsId: 'github-api', variable: 'GITHUB_TOKEN')])
+
+        pipeline.githubConfidence(
+          GITHUB_OWNER                : jldeen,
+          GITHUB_REPO                 : bikesharingapp,
+          GITHUB_COMMENT_TYPE         : pr,
+          GITHUB_PR_ISSUE_NUMBER      : env.CHANGE_ID,
+          GITHUB_COMMENT              : "You can see a private version of the changes made in this  pull request  here - http://${config.app.hostname}"
+        )
         }
       }
     }
