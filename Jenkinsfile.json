@@ -5,6 +5,9 @@
     "branch_name": "bike-image-fix",
     "hostname": "bike-image-fix.bikeapp.bikesharingweb.52.188.35.131.nip.io"
   },
+  "github": {
+    "credsid": "GITHUB_TOKEN",
+  },
   "k8s_secret": {
     "name": "bike-share-secrets"
   },
