@@ -14,8 +14,8 @@
     "host": "ttacrdl53e2sgw5z5i.azurecr.io",
     "master_acct": "ttacrdl53e2sgw5z5i",
     "alt_acct": "ttacrdl53e2sgw5z5i",
-    "jenkins_creds_id": "ttacrdl53e2sgw5z5i",
-    "repo": "bikeshare",
+    "jenkins_creds_id": "acrCreds",
+    "repo": "bikesharingapp",
     "dockeremail": ".",
     "dockerfile": "./"
   },
