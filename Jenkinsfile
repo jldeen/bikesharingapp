@@ -10,7 +10,6 @@ def pipeline = new io.estrado.Pipeline()
 podTemplate(label: 'jenkins-pipeline', containers: [
     containerTemplate(name: 'jnlp', image: 'jenkinsci/jnlp-slave:3.35-2-alpine', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', resourceRequestCpu: '200m', resourceLimitCpu: '300m', resourceRequestMemory: '256Mi', resourceLimitMemory: '512Mi'),
     containerTemplate(name: 'docker', image: 'docker:latest', command: 'cat', ttyEnabled: true),
-    containerTemplate(name: 'golang', image: 'golang:1.15.5', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:v3.3.4', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.19.3', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'azcli', image: 'microsoft/azure-cli:latest', command: 'cat', ttyEnabled: true)
@@ -24,7 +23,7 @@ volumes:[
   node ('jenkins-pipeline') {
 
     def pwd = pwd()
-    def chart_dir = "${pwd}/charts/croc-hunter"
+    def chart_dir = "${pwd}/Bikes/charts/bikes"
 
     checkout scm
 
@@ -64,14 +63,6 @@ volumes:[
     // compile tag list
     def image_tags_list = pipeline.getMapValues(image_tags_map)
 
-    stage ('compile and test') {
-
-      container('golang') {
-        sh "go test -v -race ./..."
-        sh "make bootstrap build"
-      }
-    }
-
     stage ('helm lint') {
 
       container('helm') {
@@ -90,27 +81,6 @@ volumes:[
         pipeline.helmPackage(chart_dir)
       }
     }
-
-  // stage ('helm chart upload') {
-
-  //   container('azcli') {
-  //     println "Uploading helm chart to ACR"
-
-  //       withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: config.az_sub.jenkins_creds_id,
-  //                       usernameVariable: 'TENANT_ID', passwordVariable: 'PASSWORD']]) {
-
-  //         // perform az login
-  //         pipeline.azLogin(
-  //             appid   : config.az_sub.appid
-  //         )
-
-  //         pipeline.azHelmUpload(
-  //             repo    : config.az_sub.helmReg
-  //         )
-
-  //       }
-  //     }
-  //   }
   
   stage ('docker build') {
 
