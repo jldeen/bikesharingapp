@@ -155,9 +155,9 @@ volumes:[
 
             // Kubectl labels
             container('kubectl') {
-                kubectl label pods --selector="app=bikes,release=config.app.name" routing.visualstudio.io/route-from=bikes -n config.app.namespace --overwrite=true
+                sh "kubectl label pods --selector='app=bikes,release=${config.app.name}' routing.visualstudio.io/route-from=bikes -n ${config.app.namespace} --overwrite=true"
           
-                kubectl annotate pods --selector="app=bikes,release=config.app.name" routing.visualstudio.io/route-on-header=kubernetes-route-as=config.app.branch_name -n $nameSpace --overwrite=true
+                sh "kubectl annotate pods --selector='app=bikes,release=${config.app.name}' routing.visualstudio.io/route-on-header=kubernetes-route-as=config.app.branch_name -n ${config.app.namespace} --overwrite=true"
             }
           }
         }
