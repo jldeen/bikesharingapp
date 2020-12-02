@@ -141,7 +141,7 @@ volumes:[
             chart_dir     : chart_dir,
             set           : [
               "image.tag": image_tags_list.get(0),
-              "image.repository": config.container_repo.host/bikes,
+              "image.repository": config.container_repo.host,
               "fullnameOverride": config.app.branch_name,
             ]
           )
