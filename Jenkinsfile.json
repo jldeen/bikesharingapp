@@ -7,6 +7,9 @@
   },
   "github": {
     "credsid": "GITHUB_TOKEN",
+    "owner": "jldeen",
+    "repo": "bikesharingapp",
+    "comment_type": "pr",
   },
   "k8s_secret": {
     "name": "bike-share-secrets"
