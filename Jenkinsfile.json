@@ -5,6 +5,12 @@
     "branch_name": "bike-image-fix",
     "hostname": "bike-image-fix.bikeapp.bikesharingweb.52.188.35.131.nip.io"
   },
+  "github": {
+    "credsid": "GITHUB_TOKEN",
+    "owner": "jldeen",
+    "repo": "bikesharingapp",
+    "comment_type": "pr",
+  },
   "k8s_secret": {
     "name": "bike-share-secrets"
   },
