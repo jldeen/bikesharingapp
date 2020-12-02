@@ -127,7 +127,7 @@ volumes:[
       }
   }
     // deploy only the master branch
-    if (env.BRANCH_NAME == 'bike-image-fix') {
+    if (env.BRANCH_NAME == 'main') {
       stage ('deploy to k8s') {
           // Deploy using Helm chart
         container('helm') {
@@ -137,19 +137,12 @@ volumes:[
           pipeline.helmDeploy(
             dry_run       : false,
             name          : config.app.name,
-            namespace     : config.app.name,
+            namespace     : config.app.namespace,
             chart_dir     : chart_dir,
             set           : [
-              "imageTag": image_tags_list.get(0),
-              "replicas": config.app.replicas,
-              "cpu": config.app.cpu,
-              "memory": config.app.memory,
-              "ingress.hostname": config.app.hostname,
-              "imagePullSecrets.name": config.k8s_secret.name,
-              "imagePullSecrets.repository": config.container_repo.host,
-              "imagePullSecrets.username": env.USERNAME,
-              "imagePullSecrets.password": env.PASSWORD,
-              "imagePullSecrets.email": "ServicePrincipal@AzureRM",
+              "image.Tag": image_tags_list.get(0),
+              "image.repository": config.container_repo.host/config.container_repo.repo,
+              "fullnameOverride": config.app.branch_name,
             ]
           )
           
@@ -159,6 +152,10 @@ volumes:[
                 name          : config.app.name
               )
             }
+
+            // Kubectl labels
+
+            // GitHub PR Comment
           }
         }
       }

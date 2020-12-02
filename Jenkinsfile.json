@@ -1,11 +1,9 @@
 {
   "app": {
     "name": "bike-share",
-    "replicas": "1",
-    "cpu": "10m",
-    "memory": "128Mi",
-    "test": true,
-    "hostname": "bikeshare.k8s.az.jessicadeen.com"
+    "namespace": "bikeapp",
+    "branch_name": "bike-image-fix",
+    "hostname": "bike-image-fix.bikeapp.bikesharingweb.52.188.35.131.nip.io/"
   },
   "k8s_secret": {
     "name": "bike-share-secrets"
