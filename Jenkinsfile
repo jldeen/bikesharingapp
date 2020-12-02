@@ -128,7 +128,7 @@ volumes:[
       }
   }
     // deploy only the master branch
-    if (env.BRANCH_NAME == 'bike-image-fix') {
+    if (env.BRANCH_NAME == 'PR-*') {
       stage ('deploy to k8s') {
           // Deploy using Helm chart
         container('helm') {
