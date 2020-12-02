@@ -17,7 +17,7 @@
     "jenkins_creds_id": "acrCreds",
     "repo": "bikesharingapp",
     "dockeremail": ".",
-    "dockerfile": "./"
+    "dockerfile": "./Bikes"
   },
   "az_sub": {
     "jenkins_creds_id": "azjdsub",
