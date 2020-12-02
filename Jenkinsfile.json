@@ -14,7 +14,7 @@
     "alt_acct": "ttacrdl53e2sgw5z5i",
     "jenkins_creds_id": "acrCreds",
     "repo": "bikes",
-    "image_repository": "ttacrdl53e2sgw5z5i.azurecr.io/bikes",
+    "image_repository": "ttacrdl53e2sgw5z5i.azurecr.io/ttacrdl53e2sgw5z5i/bikes",
     "dockeremail": ".",
     "dockerfile": "./Bikes"
   },
