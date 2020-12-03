@@ -10,10 +10,8 @@ def pipeline = new io.estrado.Pipeline()
 podTemplate(label: 'jenkins-pipeline', containers: [
     containerTemplate(name: 'jnlp', image: 'jenkinsci/jnlp-slave:3.35-2-alpine', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', resourceRequestCpu: '200m', resourceLimitCpu: '300m', resourceRequestMemory: '256Mi', resourceLimitMemory: '512Mi'),
     containerTemplate(name: 'docker', image: 'docker:latest', command: 'cat', ttyEnabled: true),
-    containerTemplate(name: 'commenter', image: 'cloudposse/github-commenter:latest', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:v3.3.4', command: 'cat', ttyEnabled: true),
-    containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.19.3', command: 'cat', ttyEnabled: true),
-    containerTemplate(name: 'azcli', image: 'microsoft/azure-cli:latest', command: 'cat', ttyEnabled: true)
+    containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.19.3', command: 'cat', ttyEnabled: true)
 ],
 volumes:[
     hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
@@ -127,7 +125,7 @@ volumes:[
         )
       }
   }
-    // deploy only the master branch
+    // deploy only the PR branch
     if (env.BRANCH_NAME =~ "PR-*" ) {
       stage ('deploy to k8s') {
           // Deploy using Helm chart
@@ -159,8 +157,10 @@ volumes:[
 
         // Kubectl labels
         container('kubectl') {
+            // Add label for bridge to kubernetes routing
             sh "kubectl label pods --selector='app=bikes,release=${config.app.name}' routing.visualstudio.io/route-from=bikes -n ${config.app.namespace} --overwrite=true"
-        
+
+            // Add annotation for bridge to kubernetes routing
             sh "kubectl annotate pods --selector='app=bikes,release=${config.app.name}' routing.visualstudio.io/route-on-header=kubernetes-route-as='${config.app.branch_name}' -n ${config.app.namespace} --overwrite=true"
         }
 
@@ -169,7 +169,8 @@ volumes:[
       // GitHub PR comment
       stage ('GitHub Confidence Step') {
         container('commenter') {  
-            
+        
+          // Uses Pipeline:Github plugin
           pipeline.githubConfidence(
               hostname              : config.app.hostname
           )
