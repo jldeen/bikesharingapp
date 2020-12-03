@@ -132,7 +132,8 @@ volumes:[
       stage ('deploy to k8s') {
           // Deploy using Helm chart
         container('helm') {
-                    // Create secret from Jenkins credentials manager
+
+          // Create secret from Jenkins credentials manager
           withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: config.container_repo.jenkins_creds_id,
                         usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
           pipeline.helmDeploy(
@@ -155,25 +156,23 @@ volumes:[
             }
           }
         }
+
         // Kubectl labels
         container('kubectl') {
             sh "kubectl label pods --selector='app=bikes,release=${config.app.name}' routing.visualstudio.io/route-from=bikes -n ${config.app.namespace} --overwrite=true"
         
             sh "kubectl annotate pods --selector='app=bikes,release=${config.app.name}' routing.visualstudio.io/route-on-header=kubernetes-route-as='${config.app.branch_name}' -n ${config.app.namespace} --overwrite=true"
         }
+
       }
+      
+      // GitHub PR comment
       stage ('GitHub Confidence Step') {
         container('commenter') {  
-
+            
           pipeline.githubConfidence(
               hostname              : config.app.hostname
           )
-
-        //   withCredentials([string(credentialsId: 'github-api', variable: 'GITHUB_TOKEN')]) {
-
-            
-
-        //   }
         }
       }
     }
