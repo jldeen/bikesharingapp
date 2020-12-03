@@ -163,19 +163,17 @@ volumes:[
         }
       }
       stage ('GitHub Confidence Step') {
-        container('commenter') {
-        // withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: config.github.credsid,
-        //             usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']])
-        
-          withCredentials([string(credentialsId: 'github-api', variable: 'GITHUB_TOKEN')]) {
-            pipeline.githubConfidence(
-            GITHUB_OWNER                : config.github.owner,
-            GITHUB_REPO                 : config.github.repo,
-            GITHUB_COMMENT_TYPE         : config.github.comment_type,
-            GITHUB_PR_ISSUE_NUMBER      : env.CHANGE_ID,
-            GITHUB_COMMENT              : "You can see a private version of the changes made in this  pull request  here - http://${config.app.hostname}"
-            )
-          }
+        container('commenter') {  
+
+          pipeline.githubConfidence(
+              hostname              : config.app.hostname
+          )
+
+        //   withCredentials([string(credentialsId: 'github-api', variable: 'GITHUB_TOKEN')]) {
+
+            
+
+        //   }
         }
       }
     }
