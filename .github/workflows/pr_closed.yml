@@ -8,17 +8,18 @@ env:
   # azure
   resourceGroup: jldeen2022k8s
   clusterName: jldeen2022k8s
+  nameSpace: bikeapp
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Create valid child namespace name
-        id: generate-child-space-name
+      - name: Create valid deployment name
+        id: generate-deployment-name
         run: |
-          namespace=${GITHUB_HEAD_REF::63}        
-          namespace=$(echo ${namespace//[!0-9a-zA-Z]/-} | tr '[:upper:]' '[:lower:]' | sed -e 's/^-/z/' -e 's/-$/z/')
-          echo ::set-output name=result::$namespace
+          deployName=${GITHUB_HEAD_REF::63}        
+          deployName=$(echo ${deployName//[!0-9a-zA-Z]/-} | tr '[:upper:]' '[:lower:]' | sed -e 's/^-/z/' -e 's/-$/z/')
+          echo ::set-output name=result::$deployName
 
       - uses: azure/aks-set-context@v1
         with:
@@ -27,4 +28,4 @@ jobs:
           resource-group: ${{ env.resourceGroup }}
 
       - name: Remove PR Deployment
-        run: kubectl delete deploy ${{steps.generate-child-space-name.outputs.result}}
+        run: kubectl delete deploy ${{steps.generate-deployment-name.outputs.result}} --namespace ${{ env.nameSpace }}
