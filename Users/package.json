@@ -12,11 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/microsoft/mindaro.git"
   },
-<<<<<<< HEAD
-  "author": "Local Process for Kubernetes",
-=======
   "author": "Bridge to Kubernetes",
->>>>>>> main/master
   "license": "MIT",
   "dependencies": {
     "express": "^4.14.0",
@@ -35,8 +31,4 @@
     "url": "https://github.com/microsoft/mindaro/issues"
   },
   "homepage": "https://github.com/microsoft/mindaro#readme"
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> main/master

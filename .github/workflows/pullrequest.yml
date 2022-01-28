@@ -1,96 +1,96 @@
-# name: PRFlow BikesAPI
+name: PRFlow BikesAPI
 
-# on:
-#   pull_request:
-#     branches:
-#       - main
-#     paths:
-#       - Bikes/**
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - Bikes/**
 
-# env:
-#   # azure
-#   resourceGroup: twt2020jd
-#   nameSpace: bikeapp
+env:
+  # azure
+  resourceGroup: jldeen2022k8s
+  nameSpace: bikeapp
 
-# jobs:
-#   build:
-#     runs-on: ubuntu-16.04
-#     steps:
-#       - name: "Checkout branch"
-#         uses: actions/checkout@v2
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout branch"
+        uses: actions/checkout@v2
 
-#       - name: "Login via Azure CLI"
-#         uses: azure/login@v1
-#         with:
-#           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: "Login via Azure CLI"
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
       
-#       - name: "Set PR Environment"
-#         run: |
-#           # set for this step
+      - name: "Set PR Environment"
+        run: |
+          # set for this step
 
-#           echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
+          echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
 
-#           echo "AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)" >> $GITHUB_ENV
+          echo "AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)" >> $GITHUB_ENV
 
-#           echo "INGRESS=bikeapp.bikesharingweb.52.188.35.131.nip.io" >> $GITHUB_ENV
+          echo "INGRESS=bikeapp.bikesharingweb.20.85.114.71.nip.io" >> $GITHUB_ENV
 
-#           echo "Retrieving Container Registry info..."
-#           acrName=$(az acr list -g $resourceGroup -o tsv --query [0].name)
+          echo "Retrieving Container Registry info..."
+          acrName=$(az acr list -g $resourceGroup -o tsv --query [0].name)
           
-#           echo "CONTAINER_REGISTRY=$(az acr list -g $resourceGroup -o tsv --query [0].loginServer)" >> $GITHUB_ENV
+          echo "CONTAINER_REGISTRY=$(az acr list -g $resourceGroup -o tsv --query [0].loginServer)" >> $GITHUB_ENV
 
-#           echo "REGISTRY_USERNAME=$(az acr credential show -n $acrName --query username -o tsv)" >> $GITHUB_ENV
+          echo "REGISTRY_USERNAME=$(az acr credential show -n $acrName --query username -o tsv)" >> $GITHUB_ENV
 
-#           # echo "REGISTRY_PASSWORD=$(az acr credential show -n $acrName -o tsv --query passwords[0].value)" >> $GITHUB_ENV
+          # echo "REGISTRY_PASSWORD=$(az acr credential show -n $acrName -o tsv --query passwords[0].value)" >> $GITHUB_ENV
            
-#           echo "GITHUB_SHA=$GITHUB_SHA" >> $GITHUB_ENV
+          echo "GITHUB_SHA=$GITHUB_SHA" >> $GITHUB_ENV
 
-#       # docker login
-#       - name: "docker login"
-#         uses: docker/login-action@v1
-#         with:
-#           registry: ${{ env.CONTAINER_REGISTRY }}
-#           username: ${{ env.REGISTRY_USERNAME }}
-#           password: ${{ SECRETS.REGISTRY_PASSWORD}}
+      # docker login
+      - name: "docker login"
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.CONTAINER_REGISTRY }}
+          username: ${{ env.REGISTRY_USERNAME }}
+          password: ${{ SECRETS.REGISTRY_PASSWORD}}
       
-#       - name: docker build
-#         run: |
-#           docker build Bikes/ -t $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
-#           docker push $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
+      - name: docker build
+        run: |
+          docker build Bikes/ -t $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
+          docker push $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
 
-#       - uses: azure/aks-set-context@v1
-#         with:
-#           creds: "${{ secrets.AZURE_CREDENTIALS }}"
-#           cluster-name: ${{ env.AKS_CLUSTER }}
-#           resource-group: ${{ env.resourceGroup }}
+      - uses: azure/aks-set-context@v1
+        with:
+          creds: "${{ secrets.AZURE_CREDENTIALS }}"
+          cluster-name: ${{ env.AKS_CLUSTER }}
+          resource-group: ${{ env.resourceGroup }}
 
-#       - name: Create valid branch name
-#         id: generate-valid-branch-name
-#         run: |
-#           branch=${GITHUB_HEAD_REF::63}        
-#           branch=$(echo ${branch//[!0-9a-zA-Z]/-} | tr '[:upper:]' '[:lower:]' | sed -e 's/^-/z/' -e 's/-$/z/')
-#           echo ::set-output name=result::$branch
+      - name: Create valid namespace name
+        id: generate-valid-namespace-name
+        run: |
+          namespace=${GITHUB_HEAD_REF::63}        
+          namespace=$(echo ${namespace//[!0-9a-zA-Z]/-} | tr '[:upper:]' '[:lower:]' | sed -e 's/^-/z/' -e 's/-$/z/')
+          echo ::set-output name=result::$namespace
 
-#       - name: Helm Install PR
-#         run: |
-#           cd Bikes/charts/bikes
-#           helm dependency update
-#           helm upgrade \
-#             --install ${{steps.generate-valid-branch-name.outputs.result}} . \
-#             --namespace $nameSpace \
-#             --set image.repository=$CONTAINER_REGISTRY/bikes \
-#             --set image.tag=$GITHUB_SHA \
-#             --set fullnameOverride=${{steps.generate-valid-branch-name.outputs.result}}
+      - name: Helm Install PR
+        run: |
+          cd Bikes/charts/bikes
+          helm dependency update
+          helm upgrade \
+            --install ${{steps.generate-valid-namespace-name.outputs.result}} . \
+            --namespace $nameSpace \
+            --set image.repository=$CONTAINER_REGISTRY/bikes \
+            --set image.tag=$GITHUB_SHA \
+            --set fullnameOverride=${{steps.generate-valid-namespace-name.outputs.result}}
 
-#       - name: Add routing labels
-#         run: |
-#           kubectl label pods --selector="app=bikes,release=${{steps.generate-valid-branch-name.outputs.result}}" routing.visualstudio.io/route-from=bikes -n $nameSpace --overwrite=true
+      - name: Add routing labels
+        run: |
+          kubectl label pods --selector="app=bikes,release=${{steps.generate-valid-namespace-name.outputs.result}}" routing.visualstudio.io/route-from=bikes -n $nameSpace --overwrite=true
           
-#           kubectl annotate pods --selector="app=bikes,release=${{steps.generate-valid-branch-name.outputs.result}}" routing.visualstudio.io/route-on-header=kubernetes-route-as=${{steps.generate-valid-branch-name.outputs.result}} -n $nameSpace --overwrite=true
+          kubectl annotate pods --selector="app=bikes,release=${{steps.generate-valid-namespace-name.outputs.result}}" routing.visualstudio.io/route-on-header=kubernetes-route-as=${{steps.generate-valid-branch-name.outputs.result}} -n $nameSpace --overwrite=true
 
-#       - uses: jldeen/dev-spaces/actions/add-review-url@Releases/v2
-#         with:
-#           repo-token: ${{ secrets.GITHUB_TOKEN }}
-#           host: "${{ env.INGRESS }}"
-#           branch-name: ${{steps.generate-valid-branch-name.outputs.result}}
-#           protocol: "http"
+      - uses: jldeen/dev-spaces/actions/add-review-url@Releases/v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          host: "${{ env.INGRESS }}"
+          branch-name: ${{steps.generate-valid-namespace-name.outputs.result}}
+          protocol: "http"
