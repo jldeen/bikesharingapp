@@ -2,12 +2,17 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "bridge-to-kubernetes.service",
-            "type": "bridge-to-kubernetes.service",
-            "service": "bikes",
+            "label": "bridge-to-kubernetes.resource",
+            "type": "bridge-to-kubernetes.resource",
+            "resource": "bikes",
+            "resourceType": "service",
             "ports": [
                 3000
-            ]
+            ],
+            "targetCluster": "jldeen2022k8s",
+            "targetNamespace": "bikeapp",
+            "useKubernetesServiceEnvironmentVariables": false,
+            "isolateAs": "jessicad-b1ab"
         }
     ]
 }

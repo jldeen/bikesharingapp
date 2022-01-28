@@ -3,14 +3,17 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch via NPM with Kubernetes (Preview)",
+            "name": "Launch via NPM with Kubernetes",
             "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run-script",
                 "debug"
             ],
             "port": 9229,
-            "preLaunchTask": "bridge-to-kubernetes.service"
+            "preLaunchTask": "bridge-to-kubernetes.resource",
+            "env": {
+                "GRPC_DNS_RESOLVER": "native"
+            }
         },
         {
             "type": "node",
