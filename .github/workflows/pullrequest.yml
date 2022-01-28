@@ -58,7 +58,8 @@ jobs:
           docker build Bikes/ -t $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
           docker push $CONTAINER_REGISTRY/bikes:$GITHUB_SHA
 
-      - uses: azure/aks-set-context@v1
+      - name: Set AKS context
+        uses: azure/aks-set-context@v1
         with:
           creds: "${{ secrets.AZURE_CREDENTIALS }}"
           cluster-name: ${{ env.AKS_CLUSTER }}
@@ -86,9 +87,10 @@ jobs:
         run: |
           kubectl label pods --selector="app=bikes,release=${{steps.generate-valid-namespace-name.outputs.result}}" routing.visualstudio.io/route-from=bikes -n $nameSpace --overwrite=true
           
-          kubectl annotate pods --selector="app=bikes,release=${{steps.generate-valid-namespace-name.outputs.result}}" routing.visualstudio.io/route-on-header=kubernetes-route-as=${{steps.generate-valid-branch-name.outputs.result}} -n $nameSpace --overwrite=true
+          kubectl annotate pods --selector="app=bikes,release=${{steps.generate-valid-namespace-name.outputs.result}}" routing.visualstudio.io/route-on-header=kubernetes-route-as=${{steps.generate-valid-namespace-name.outputs.result}} -n $nameSpace --overwrite=true
 
-      - uses: jldeen/dev-spaces/actions/add-review-url@Releases/v2
+      - name: Add a dash of confidence
+        uses: jldeen/dev-spaces/actions/add-review-url@Releases/v2
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           host: "${{ env.INGRESS }}"
