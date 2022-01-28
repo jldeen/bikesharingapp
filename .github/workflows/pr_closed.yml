@@ -26,5 +26,5 @@ jobs:
           cluster-name: ${{ env.clusterName }}
           resource-group: ${{ env.resourceGroup }}
 
-      - name: Remove PR Namespace
-        run: kubectl delete ns ${{steps.generate-child-space-name.outputs.result}}
+      - name: Remove PR Deployment
+        run: kubectl delete deploy ${{steps.generate-child-space-name.outputs.result}}
