@@ -22,7 +22,7 @@
     "validate.js": "^0.11.1",
     "tedious": "4.1.1",
     "util": "0.10.3",
-    "async": "^2.1.5"
+    "async": "^2.6.4"
   },
   "devDependencies": {
     "nodemon": "^1.18.10"
